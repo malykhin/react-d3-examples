@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import Map from '../components/Map'
 import BarChart from '../components/BarChart'
 import DonutChart from '../components/DonutChart'
+import SvgView from '../components/SvgView'
 import { getData } from '../service'
 
 const MainWrap = styled.div`
@@ -26,6 +27,7 @@ export default class Root extends Component {
   render () {
     return (
       <MainWrap>
+        <SvgView />
         <Map />
         <BarChart data={this.state.data} />
         <DonutChart data={this.state.data} />
