@@ -13,6 +13,10 @@ const Wrapper = styled.div`
   }
 `
 
+const Container = styled.div`
+  position: relative;
+`
+
 const ControlRow = styled.div`
   display: flex;
   width: 300px;
@@ -47,12 +51,12 @@ const Mark = styled.div`
   font-size: 12px;
   font-weight: 600;
   color: black;
+  z-index: 10;
 `
 
 export default class SvgView extends Component {
   constructor (props) {
     super(props)
-    this.node = React.createRef()
     this.state = {
       image: '',
       justUploaded: false,
@@ -87,9 +91,12 @@ export default class SvgView extends Component {
       .on('click', (_, index, nodes) => {
         const place = nodes[index]
         const areaIndex = place.getAttribute('area-index')
-        const box = nodes[index].getBoundingClientRect()
-        const x = box.x + box.width / 2
-        const y = box.y + box.height / 2
+
+        const box = place.getBoundingClientRect()
+        const containerBounds = this.containerRef.getBoundingClientRect()
+
+        const x = box.x - containerBounds.x + box.width / 2
+        const y = box.y - containerBounds.y + box.height / 2
         this.setState({click: {
           clicked: true,
           areaIndex,
@@ -109,7 +116,6 @@ export default class SvgView extends Component {
   }
 
   embedSvg () {
-    // const selector = 'rect[style="fill: rgb(255, 0, 0);"]'
     const selector = 'polygon.fil2'
 
     select(this.node)
@@ -209,8 +215,6 @@ export default class SvgView extends Component {
     })
   }
 
-  getNodeRef = node => (this.node = node)
-
   render () {
     const {
       click,
@@ -229,24 +233,26 @@ export default class SvgView extends Component {
 
     return (
       <Wrapper>
-        {
-          Object.keys(tenants).map(key => {
-            const tenant = tenants[key]
-            return (
-              <Mark
-                key={key}
-                x={tenant.x}
-                y={tenant.y}
-              >
-                {tenant.number}
-              </Mark>
-            )
-          })
-        }
         <FileInput
           onChange={this.handleFileSelect}
         />
-        <div ref={this.getNodeRef} />
+        <Container innerRef={node => { this.containerRef = node }}>
+          {
+            Object.keys(tenants).map(key => {
+              const tenant = tenants[key]
+              return (
+                <Mark
+                  key={key}
+                  x={tenant.x}
+                  y={tenant.y}
+                >
+                  {tenant.number}
+                </Mark>
+              )
+            })
+          }
+          <div ref={node => { this.node = node }} />
+        </Container>
         {
           click.clicked &&
           <div>

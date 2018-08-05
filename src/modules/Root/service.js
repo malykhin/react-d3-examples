@@ -7,7 +7,7 @@ export const getData = () => {
   return names.map(name => ({
     name,
     value: faker.random.number({min: 1, max: 100})
-  }))
+  })).slice(faker.random.number({min: 2, max: names.length - 3}))
 }
 
 export const hexToRgbA = (hex) => {

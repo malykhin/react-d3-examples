@@ -30,6 +30,7 @@ import {
 import Tooltip from './Tooltip'
 
 const ChartContainer = styled.div`
+  position: relative;
   .bar:hover {
     opacity: 0.2;
   }
@@ -60,7 +61,8 @@ export default class BarChart extends Component {
   }
 
   renderChart = () => {
-    const chart = select(this.node)
+    const chart = select(this.svgRef)
+    const container = this.containerRef
     const data = this.props.data
 
     const margin = {
@@ -98,17 +100,20 @@ export default class BarChart extends Component {
         .attr('class', 'bar')
         .attr('transform', `translate(${margin.left}, ${margin.top})`)
         .attr('width', xScale.bandwidth())
+        .attr('y', this.height)
+        .attr('height', 0)
         .attr('fill', (_, index) => this.colorScale[index])
         .on('mouseover', (d, index, nodes) => {
           const bar = select(nodes[index])
-          const bounds = bar.node().getBBox()
+          const bounds = bar.node().getBoundingClientRect()
+          const containerBounds = container.getBoundingClientRect()
           this.setState({
             tooltip: {
               ...this.state.tooltip,
               text: d.value.toString(),
               visible: true,
-              x: bounds.x + bounds.width / 2 + 10,
-              y: bounds.y + bounds.height / 2
+              x: bounds.x - containerBounds.x + bounds.width / 2 + 10,
+              y: bounds.y - containerBounds.y + bounds.height / 2
             }
           })
         })
@@ -126,8 +131,9 @@ export default class BarChart extends Component {
 
       bars = enter
         .merge(bars)
-        .transition(t)
         .attr('x', d => xScale(d.name))
+        .attr('width', xScale.bandwidth())
+        .transition(t)
         .attr('y', d => yScale(d.value))
         .attr('height', d => this.height - yScale(d.value))
     }
@@ -168,6 +174,11 @@ export default class BarChart extends Component {
           .selectAll('.xaxis')
           .transition(t)
           .call(xAxis)
+          .selectAll('text')
+          .style('text-anchor', 'end')
+          .attr('dx', '-.8em')
+          .attr('dy', '-.55em')
+          .attr('transform', 'rotate(-45)')
       }
     }
 
@@ -179,9 +190,11 @@ export default class BarChart extends Component {
   render () {
     const { tooltip } = this.state
     return (
-      <ChartContainer>
+      <ChartContainer
+        innerRef={node => { this.containerRef = node }}
+      >
         <svg
-          ref={node => { this.node = node }}
+          ref={node => { this.svgRef = node }}
         />
         {
           tooltip.visible &&

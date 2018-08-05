@@ -13,10 +13,6 @@ import {
 } from 'd3-scale-chromatic'
 
 import {
-  transition
-} from 'd3-transition'
-
-import {
   pie
 } from 'd3-shape'
 
@@ -24,10 +20,14 @@ import {
   arc
 } from 'd3'
 
-import Tooltip from './Tooltip'
+const Wrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`
 
 const LegendWrap = styled.div`
-  display: inline-block;
+  
 `
 
 const Row = styled.div`
@@ -66,13 +66,7 @@ export default class DonutChart extends Component {
   constructor () {
     super()
     this.state = {
-      legend: [],
-      tooltip: {
-        text: '',
-        visible: false,
-        x: 0,
-        y: 0
-      }
+      legend: []
     }
     this.width = 500
     this.height = 500
@@ -113,8 +107,6 @@ export default class DonutChart extends Component {
       left: 40
     }
 
-    const t = transition().duration(500)
-
     chart
       .attr('width', this.width + margin.left)
       .attr('height', this.height + margin.bottom + margin.top)
@@ -144,7 +136,6 @@ export default class DonutChart extends Component {
 
       arcs = enter
         .merge(arcs)
-        .transition(t)
         .attr('d', arcLayout)
         .attr('fill', (_, index) => this.colorScale.range()[index])
     }
@@ -152,23 +143,13 @@ export default class DonutChart extends Component {
   }
 
   render () {
-    const { tooltip } = this.state
     return (
-      <div>
+      <Wrapper>
         <svg
           ref={node => { this.node = node }}
         />
-        {
-          tooltip.visible &&
-          <Tooltip
-            x={tooltip.x}
-            y={tooltip.y}
-          >
-            {tooltip.text}
-          </Tooltip>
-        }
         <Legend legend={this.state.legend} />
-      </div>
+      </Wrapper>
     )
   }
 }

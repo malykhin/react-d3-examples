@@ -1,9 +1,14 @@
 import React, { Component } from 'react'
+import styled from 'styled-components'
 import { select } from 'd3-selection'
 
 import Tooltip from './Tooltip'
 
 import { mapElements } from '../mapElements'
+
+const Container = styled.div`
+  position: relative;
+`
 
 export default class Map extends Component {
   constructor () {
@@ -29,7 +34,8 @@ export default class Map extends Component {
   }
 
   renderD3 = () => {
-    const node = this.node
+    const node = this.svgRef
+    const container = this.containerRef
     const mapData = this.state.mapData
 
     select(node)
@@ -56,7 +62,8 @@ export default class Map extends Component {
       .selectAll('path')
       .data(mapData)
       .on('mouseover', (d, index, nodes) => {
-        const bounds = select(nodes[index]).node().getBBox()
+        const bounds = nodes[index].getBoundingClientRect()
+        const containerBounds = container.getBoundingClientRect()
         const mapData = this.state.mapData
         mapData[index].fill = 'gray'
         this.setState({
@@ -65,8 +72,8 @@ export default class Map extends Component {
             ...this.state.tooltip,
             text: index.toString(),
             visible: true,
-            x: bounds.x + bounds.width / 2,
-            y: bounds.y + bounds.height / 2
+            x: bounds.x - containerBounds.x + bounds.width / 2,
+            y: bounds.y - containerBounds.y + bounds.height / 2
           }
         })
       })
@@ -112,9 +119,11 @@ export default class Map extends Component {
     const { tooltip } = this.state
 
     return (
-      <div>
+      <Container
+        innerRef={node => { this.containerRef = node }}
+      >
         <svg
-          ref={node => { this.node = node }}
+          ref={node => { this.svgRef = node }}
           width={500}
           height={500}
         />
@@ -127,7 +136,7 @@ export default class Map extends Component {
             {tooltip.text}
           </Tooltip>
         }
-      </div>
+      </Container>
     )
   }
 }

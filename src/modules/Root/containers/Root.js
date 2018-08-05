@@ -10,8 +10,6 @@ import { getData } from '../service'
 const MainWrap = styled.div`
   margin-left: 20px;
   margin-top: 20px;
-
-
 `
 export default class Root extends Component {
   state = {
@@ -21,7 +19,7 @@ export default class Root extends Component {
   componentDidMount () {
     setInterval(() => {
       this.setState({data: getData()})
-    }, 2000)
+    }, 5000)
   }
 
   render () {
